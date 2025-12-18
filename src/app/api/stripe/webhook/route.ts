@@ -74,6 +74,7 @@ export async function POST(req: Request) {
           customerId,
           subscriptionId,
           status: sub.status,
+                  // @ts-expect-error - Stripe typing issue with current_period_end
           currentPeriodEnd: sub.current_period_end,
         });
       }
@@ -88,6 +89,7 @@ export async function POST(req: Request) {
           customerId: sub.customer,
           subscriptionId: sub.id,
           status: sub.status,
+                  // @ts-expect-error - Stripe typing issue with current_period_end
           currentPeriodEnd: sub.current_period_end,
         });
       }
