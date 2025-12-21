@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navimport { supabase } from '@/lib/supabaseClient';igation';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -11,13 +10,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
-
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  const supabase = createClientComponentCnc () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       router.push('/login');
