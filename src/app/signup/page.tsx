@@ -35,6 +35,7 @@ export default function SignupPage() {
         data: {
           full_name: fullName,
           company_name: company,
+                role: role,
         },
       },
     });
