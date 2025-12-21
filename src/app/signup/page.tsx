@@ -5,31 +5,15 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
-  const [fullName, setFullName] = useState('');
-  const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Validate password match
-    if (password !== confirmPassword) {
-      setMessage('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-      options: {
-        data: {
-          full_name: fullName,
-          company_name: companyName,
-        },
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.getxaxo.com'}/dashboard`,
-      },
     setMessage('');
 
     const { error } = await supabase.auth.signUp({
@@ -56,30 +40,7 @@ const [loading, setLoading] = useState(false);
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="fullName" className="sr-only">Full name</label>
-            <input
-              id="fullName"
-              type="text"
-              required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Full name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="companyName" className="sr-only">Company name (optional)</label>
-            <input
-              id="companyName"
-              type="text"
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Company name (optional)"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="sr-only">Email</label>
+              <label htmlFor="email" className="sr-only">Email</label>
               <input
                 id="email"
                 type="email"
@@ -101,19 +62,7 @@ const [loading, setLoading] = useState(false);
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </di
-          <div>
-            <label htmlFor="confirmPassword" className="sr-only">Confirm password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>v> || !fullName.trim()
+            </div>
           </div>
           {message && <p className="text-sm text-center text-blue-600">{message}</p>}
           <button
