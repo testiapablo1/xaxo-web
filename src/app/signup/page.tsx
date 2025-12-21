@@ -5,14 +5,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
-  const   const [fullName, setFullName] = useState('');
-[const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
   const [companyName, setCompanyName] = useState('');
-const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const router = useRouter();
+const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,17 +23,17 @@ const [password, setPassword] = useState('');
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
       options: {
         data: {
           full_name: fullName,
           company_name: companyName,
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/dashboard`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.getxaxo.com'}/dashboard`,
       },
-    });      email,
+    setMessage('');
+
+    const { error } = await supabase.auth.signUp({
+      email,
       password,
     });
 
@@ -56,7 +55,8 @@ const [password, setPassword] = useState('');
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
           <div className="rounded-md shadow-sm -space-y-px">
-            <div><label htmlFor="fullName" className="sr-only">Full name</label>
+            <div>
+              <label htmlFor="fullName" className="sr-only">Full name</label>
             <input
               id="fullName"
               type="text"
@@ -79,7 +79,7 @@ const [password, setPassword] = useState('');
             />
           </div>
           <div>
-              <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="sr-only">Email</label>
               <input
                 id="email"
                 type="email"
@@ -101,7 +101,8 @@ const [password, setPassword] = useState('');
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </di<div>
+            </di
+          <div>
             <label htmlFor="confirmPassword" className="sr-only">Confirm password</label>
             <input
               id="confirmPassword"
@@ -112,7 +113,7 @@ const [password, setPassword] = useState('');
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </div> || !fullName.trim()v>
+          </div>v> || !fullName.trim()
           </div>
           {message && <p className="text-sm text-center text-blue-600">{message}</p>}
           <button
