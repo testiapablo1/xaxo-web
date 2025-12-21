@@ -42,25 +42,12 @@ export default function SignupPage() {
     if (error) {
       setMessage(error.message);
     } else {
-            // Create profile record
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: user.id,
-            full_name: fullName,
-            company: company,
-            role: role
-          }]);
-        
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-        }
                         {/* Profile fields */}
               <div>
                 <label htmlFor="fullName" className="sr-only">Full name</label>
                 <input
+                        setMessage('Check your email for confirmation link!');
+      router.push('/login');
                   id="fullName"
                   name="fullName"
                   type="text"
