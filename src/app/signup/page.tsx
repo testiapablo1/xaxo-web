@@ -10,11 +10,30 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
+    const [fullName, setFullName] = useState('');
+  const [company, setCompany] = useState('');
+  const [role, setRole] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+
+        // Validate passwords match
+    if (password !== confirmPassword) {
+      setMessage('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Validate profile fields
+    if (!fullName || !company || !role) {
+      setMessage('Please fill in all fields');
+      setLoading(false);
+      return;
+    }
+
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -24,6 +43,22 @@ export default function SignupPage() {
     if (error) {
       setMessage(error.message);
     } else {
+            // Create profile record
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: user.id,
+            full_name: fullName,
+            company: company,
+            role: role
+          }]);
+        
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
+      }
       setMessage('Check your email for confirmation link!');
       setTimeout(() => router.push('/login'), 2000);
     }
@@ -38,6 +73,51 @@ export default function SignupPage() {
           <p className="mt-2 text-center text-sm text-gray-600">Start your $100/month subscription</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
+
+                        {/* Profile fields */}
+              <div>
+                <label htmlFor="fullName" className="sr-only">Full name</label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  placeholder="Full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="company" className="sr-only">Company name</label>
+                <input
+                  id="company"
+                  name="company"
+                  type="text"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  placeholder="Company name"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="role" className="sr-only">Role</label>
+                <select
+                  id="role"
+                  name="role"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
+                  <option value="">Select role</option>
+                  <option value="founder">Founder</option>
+                  <option value="cto">CTO</option>
+                  <option value="developer">Developer</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">Email</label>
@@ -63,6 +143,20 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+
+                          <div>
+                <label htmlFor="confirmPassword" className="sr-only">Confirm password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
           </div>
           {message && <p className="text-sm text-center text-blue-600">{message}</p>}
           <button
