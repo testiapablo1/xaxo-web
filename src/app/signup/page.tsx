@@ -10,69 +10,34 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
-    const [fullName, setFullName] = useState('');
-  const [company, setCompany] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
-        // Validate passwords match
-    if (password !== confirmPassword) {
-      setMessage('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
-            options: {
-        data: {
-          full_name: fullName,
-          company_name: company,
-                role: role,
-        },
-      },
     });
 
     if (error) {
       setMessage(error.message);
     } else {
-                        {/* Profile fields */}
-              <div>
-                <label htmlFor="fullName" className="sr-only">Full name</label>
-                <input
-                        setMessage('Check your email for confirmation link!');
-      router.push('/login');
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Full name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor="company" className="sr-only">Company name</label>
-                <input
-                  id="company"
-                  name="company"
-                  type="text"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Company name"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                />
-              </div>
-              </div>
+      setMessage('Check your email for confirmation link!');
+      setTimeout(() => router.push('/login'), 2000);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+        <div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">Create XAXO Account</h2>
+          <p className="mt-2 text-center text-sm text-gray-600">Start your $100/month subscription</p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSignup}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">Email</label>
@@ -98,20 +63,6 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-
-                          <div>
-                <label htmlFor="confirmPassword" className="sr-only">Confirm password</label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
           </div>
           {message && <p className="text-sm text-center text-blue-600">{message}</p>}
           <button
