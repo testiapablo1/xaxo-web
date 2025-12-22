@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import Stripe from "stripe";
 
-export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export default async function SubscribePage() {
   const cookieStore = await cookies();
