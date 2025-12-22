@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 
+
+export const dynamic = 'force-dynamic';
 export async function POST() {
-      // Check authentication
+  try {
+    // Check authentication
     const supabase = getSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
     
@@ -14,9 +18,11 @@ export async function POST() {
       );
     }
 
-  try {
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+    const appUrl = process.env.NEXT_PUBLIC_URL || 'https://www.getxaxo.com';
+
+    // Type the params explicitly
+    const params: Stripe.Checkout.SessionCreateParams = {
+      mode: 'subscription' as const,
       payment_method_types: ['card'],
       line_items: [
         {
@@ -24,7 +30,7 @@ export async function POST() {
             currency: 'usd',
             product_data: {
               name: 'XAXO Enterprise AI Agent Platform',
-              description: 'Automate customer support, sales, and operations with intelligent AI agents',
+              description: 'Automate customer support, sales, and operations',
             },
             unit_amount: 10000, // $100.00
             recurring: {
@@ -34,13 +40,16 @@ export async function POST() {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
-            metadata: {
+
+      success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/cancel`,
+      metadata: {
         user_id: session.user.id,
-        user_email: session.user.email,
+        user_email: session.user.email || '',
       },
-    });
+    };
+
+    const checkoutSession = await stripe.checkout.sessions.create(params);
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error: any) {
