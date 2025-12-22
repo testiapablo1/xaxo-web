@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import SubscribeButton from "./SubscribeButton";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -92,6 +93,7 @@ export default function DashboardPage() {
             ) : (
               <div className="mt-6">
                 <p className="text-sm text-gray-600">No active license key. Please complete your subscription via Stripe.</p>
+            <SubscribeButton />
               </div>
             )}
 
