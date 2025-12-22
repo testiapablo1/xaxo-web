@@ -1,42 +1,24 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-import Stripe from "stripe";
+import { stripe } from "@/lib/stripe";
+import { createClient } from "@supabase/supabase-js";
 
-export const runtime = "nodejs";
-
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const token = authHeader.split(" ")[1];
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return cookieStore.getAll(); },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
-          },
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-
-    const { data, error } = await supabase.auth.getUser();
-    if (error) throw error;
-    const user = data?.user;
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized - Please login first" }, { status: 401 });
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
-
-    const stripeSecret = process.env.STRIPE_SECRET_KEY;
-    const priceId = process.env.STRIPE_PRICE_ID;
+    const priceId = process.env.STRIPE_PRICE_ID || "price_1ShCuWB33mCF14xBaEPZqfn7";
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.getxaxo.com";
-    if (!stripeSecret || !priceId) {
-      return NextResponse.json({ error: "Stripe env vars missing" }, { status: 500 });
-    }
-
-    const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" as any });
-
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
@@ -49,7 +31,6 @@ export async function POST() {
         user_email: user.email ?? "",
       },
     };
-
     const session = await stripe.checkout.sessions.create(sessionParams);
     return NextResponse.json({ url: session.url });
   } catch (e: any) {

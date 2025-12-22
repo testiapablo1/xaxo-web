@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { createBrowserClient } from "@supabase/supabase-js";
 
 export default function SubscribeButton() {
   const [loading, setLoading] = useState(false);
@@ -9,7 +10,22 @@ export default function SubscribeButton() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "/login?next=/dashboard";
+        return;
+      }
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        }
+      });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Checkout failed");
       if (!json?.url) throw new Error("Missing checkout url");
@@ -19,7 +35,6 @@ export default function SubscribeButton() {
       setLoading(false);
     }
   }
-
   return (
     <div className="mt-6">
       <button
