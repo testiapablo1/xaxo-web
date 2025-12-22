@@ -38,7 +38,7 @@ export default function SignupPage() {
             full_name: fullName.trim(),
             company_name: companyName.trim(),
           },
-          emailRedirectTo: `${appUrl}/dashboard`,
+          emailRedirectTo: `${appUrl}/subscribe`,
         },
       });
       if (signUpError) throw signUpError;
