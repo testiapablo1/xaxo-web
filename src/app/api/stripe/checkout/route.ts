@@ -1,9 +1,21 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { getSupabaseClient } from '@/lib/supabaseClient';
 
 export async function POST() {
+      // Check authentication
+    const supabase = getSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Please login first' },
+        { status: 401 }
+      );
+    }
+
   try {
-    const session = await stripe.checkout.sessions.create({
+    const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [
@@ -24,9 +36,13 @@ export async function POST() {
       ],
       success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
+            metadata: {
+        user_id: session.user.id,
+        user_email: session.user.email,
+      },
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: checkoutSession.url });
   } catch (error: any) {
     console.error('Stripe checkout error:', error);
     return NextResponse.json(

@@ -1,0 +1,10 @@
+[33m3fdde19[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Remove auth requirements from subscribe page
+[33m38adc62[m Fix Stripe checkout: implement API and remove auth requirements
+[33m8e6057c[m Fix: Replace Stripe dashboard links with /subscribe on homepage
+[33m2d82526[m Fix signup flow: redirect to /subscribe, update homepage CTA to /signup
+[33m45da998[m feat: required signup fields (name + confirm password)
+[33m79957d8[m feat: required signup fields (full_name, company_name, confirm password) + fix api routes
+[33m642ac0e[m fix: restore working signup page (email + password only) to resolve turbopack errors
+[33m29ed352[m fix: turbopack signup parse error - remove git commands and window.location
+[33me2dc4fc[m feat: required full name + confirm password, remove role, signup metadata
+[33m8996aa6[m fix: restore working signup page from bd5f4bb
