@@ -11,7 +11,7 @@ export default function SubscribePage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      // if (!data.session) router.push('/login');
+      
     });
   }, [router]);
 
@@ -19,16 +19,10 @@ export default function SubscribePage() {
     setLoading(true);
     setError(null);
     try {
-//       const { data: sess } = await supabase.auth.getSession();
-      // const token = sess.session?.access_token;
-      // if (!token) {
-        // router.push('/login');
-        // return;
       }
 
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
-//        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to create checkout session');
