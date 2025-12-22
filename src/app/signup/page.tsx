@@ -1,82 +1,107 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const isValid = useMemo(() => {
+    if (!fullName.trim()) return false;
+    if (!email.trim() || !email.includes("@")) return false;
+    if (!password || password.length < 8) return false;
+    if (!confirmPassword || confirmPassword !== password) return false;
+    return true;
+  }, [fullName, email, password, confirmPassword]);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    if (!isValid) return;
     setLoading(true);
-    setMessage('');
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Check your email for confirmation link!');
-      setTimeout(() => router.push('/login'), 2000);
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://xaxo-web.vercel.app";
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            company_name: companyName.trim(),
+          },
+          emailRedirectTo: `${appUrl}/dashboard`,
+        },
+      });
+      if (signUpError) throw signUpError;
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err?.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }
+
+  if (success) {
+    return (
+      <main className="mx-auto max-w-md p-6">
+        <h1 className="text-2xl font-semibold">Check your email</h1>
+        <p className="mt-2 text-sm">
+          We sent you a confirmation link. Please confirm your email to access the dashboard.
+        </p>
+        <button className="mt-6 rounded-md bg-black px-4 py-2 text-white" onClick={() => router.push("/login")}>
+          Go to login
+        </button>
+      </main>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <main className="mx-auto max-w-md p-6">
+      <h1 className="text-2xl font-semibold">Create your XAXO account</h1>
+      <p className="mt-1 text-sm text-gray-600">Start your subscription and get your license key.</p>
+
+      <form className="mt-6 space-y-4" onSubmit={onSubmit}>
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">Create XAXO Account</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">Start your $100/month subscription</p>
+          <label className="text-sm font-medium">Full name *</label>
+          <input className="mt-1 w-full rounded-md border p-2" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSignup}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">Email</label>
-              <input
-                id="email"
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
-                id="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          {message && <p className="text-sm text-center text-blue-600">{message}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {loading ? 'Creating account...' : 'Sign up'}
-          </button>
-        </form>
-        <div className="text-center">
-          <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">Already have an account? Log in</a>
+
+        <div>
+          <label className="text-sm font-medium">Company name</label>
+          <input className="mt-1 w-full rounded-md border p-2" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
         </div>
-      </div>
-    </div>
+
+        <div>
+          <label className="text-sm font-medium">Email *</label>
+          <input className="mt-1 w-full rounded-md border p-2" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Password *</label>
+          <input className="mt-1 w-full rounded-md border p-2" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <p className="mt-1 text-xs text-gray-500">Minimum 8 characters.</p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Confirm password *</label>
+          <input className="mt-1 w-full rounded-md border p-2" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+        </div>
+
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+        <button className="w-full rounded-md bg-black px-4 py-2 text-white disabled:opacity-50" type="submit" disabled={!isValid || loading}>
+          {loading ? "Creating..." : "Create account"}
+        </button>
+      </form>
+    </main>
   );
 }
