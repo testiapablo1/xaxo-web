@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SubscribeButton() {
   const [loading, setLoading] = useState(false);
@@ -10,10 +10,6 @@ export default function SubscribeButton() {
     setError(null);
     setLoading(true);
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         window.location.href = "/login?next=/dashboard";
